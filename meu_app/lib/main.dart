@@ -1,155 +1,97 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 145, 93, 150)),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'Aula do Prof. Jorge'),
-    );
-  }
-}
+void main() => runApp(const MaterialApp(home: MyHomePage()));
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
-
+  const MyHomePage({super.key});
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  // 1. O Controlador: Ele serve para "capturar" e manipular o texto do TextField
-  final TextEditingController _textoController = TextEditingController();
+  // O Controlador (Gerente da Memória RAM)[cite: 1]
+  final TextEditingController _controller = TextEditingController();
   
-  // Variável para armazenar o nome que o aluno vai digitar
-  String _nomeExibido = '';
+  String _memoriaSet = ''; // Variável onde o SET armazena o dado
+  String _telaGet = '';    // Variável que o GET exibe na tela
 
-  // 2. Boa prática: Sempre fechar o controller para evitar vazamento de memória (dispose coletor de lixo)
   @override
   void dispose() {
-    _textoController.dispose();
+    _controller.dispose(); // Ciclo de vida: evita Memory Leak[cite: 1]
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      // CORREÇÃO 1: Para Formulários (Teclado)
-body: SingleChildScrollView(
-  child: Column(
-    children: [ /* Seus TextFields aqui */ ],
-  ),
-)
-// CORREÇÃO 2: Para Listas Dinâmicas
-body: ListView(
-  children: [
-    Card(child: Text('Aluno 1')),
-    Card(child: Text('Aluno 2')),
-    Card(child: Text('Aluno 3')),
-  ],
-)
+      appBar: AppBar(title: const Text('EEEP Miguel Gurgel'), backgroundColor: Colors.purple.shade100),
+      
+      // SingleChildScrollView + Center: Proteção contra erros de layout e teclado
+      body: SingleChildScrollView(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              children: [
+                // Widgets de Conteúdo Básicos
+                const Icon(Icons.school, size: 50, color: Colors.amber),
+                const SizedBox(height: 10),
+                Image.network('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR4oi8aopMHHKougzmDPI42HmLu_CQNLDJZRA&s', height: 80),
+                const SizedBox(height: 20),
 
-      body:
-       Center(
-        // Padding adicionado para o TextField não ficar colado nas bordas da tela
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          // Este código quebra se a tela for pequena ou se o teclado subir!
-
-
-          child: 
-          // Este código causa um Overflow Horizontal na lateral direita!
-
-Column(
-            mainAxisAlignment: MainAxisAlignment.center, 
-            children: [
-              // Widget de Texto Informativo
-              const Text(
-                'Bem-vindos à EEEP Miguel Gurgel',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 24.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.deepPurple,
+                // Widget de Interação: Campo de Entrada
+                TextField(
+                  controller: _controller,
+                  decoration: const InputDecoration(labelText: 'Nome do Aluno', border: OutlineInputBorder()),
                 ),
-              ),
-              
-              const SizedBox(height: 15),
+                const SizedBox(height: 15),
 
-              // Widget de Ícone
-              const Icon(
-                Icons.school,       
-                size: 60.0,         
-                color: Colors.amber, 
-              ),
-
-              const SizedBox(height: 15),
-
-              // Widget de Imagem
-              Image.network(
-                'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR4oi8aopMHHKougzmDPI42HmLu_CQNLDJZRA&s', 
-                height: 100.0,
-                fit: BoxFit.contain,
-              ),
-
-              const SizedBox(height: 30),
-
-              // ==========================================
-              // 3. NOVO WIDGET: TEXTFIELD (Campo de Entrada)
-              // ==========================================
-              TextField(
-                controller: _textoController, // Vincula o campo ao controlador
-                decoration: const InputDecoration(
-                  labelText: 'Digite o nome do aluno',
-                  border: OutlineInputBorder(), // Cria uma borda em volta do campo
-                  prefixIcon: Icon(Icons.person), // Adiciona um ícone dentro do campo
+                // Linha de Botões com Expanded para evitar Overflow Horizontal
+                Row(
+                  children: [
+                    // 1. AÇÃO SET: Atribui/Guarda o texto do campo na memória
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => setState(() => _memoriaSet = _controller.text),
+                        child: const Text('SET'),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    
+                    // 2. AÇÃO GET: Pega o que estava na memória e prepara para a tela
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => setState(() => _telaGet = _memoriaSet),
+                        child: const Text('GET'),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    
+                    // 3. AÇÃO CLEAR: Limpa o campo e as variáveis[cite: 1]
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          _controller.clear(); // Limpa o TextField[cite: 1]
+                          setState(() { _memoriaSet = ''; _telaGet = ''; });
+                        },
+                        child: const Text('CLEAR'),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
+                
+                const SizedBox(height: 30),
+                const Divider(),
 
-              const SizedBox(height: 20),
-
-              // Texto reativo que muda quando clicamos no botão
-              Text(
-                _nomeExibido.isEmpty ? '' : 'Aluno matriculado: $_nomeExibido',
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: Colors.green),
-              ),
-            ],
+                // Exibição dos Resultados na Tela
+                Text('Valor no SET (Memória): $_memoriaSet', style: const TextStyle(fontSize: 16, color: Colors.orange)),
+                const SizedBox(height: 10),
+                Text('Valor no GET (Recuperado): $_telaGet', style: const TextStyle(fontSize: 16, color: Colors.blue, fontWeight: FontWeight.bold)),
+              ],
+            ),
           ),
         ),
       ),
-
-      // ==========================================
-      // 4. FLOATING ACTION BUTTON (Customizado)
-      // ==========================================
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // O "pulo do gato": usamos o setState para atualizar a tela com o texto do controlador
-          setState(() {
-            _nomeExibido = _textoController.text;
-          });
-          
-          // Limpa o campo de texto após clicar
-          _textoController.clear();
-        },
-        tooltip: 'Enviar Nome',
-        child: const Icon(Icons.check), // Mudamos o ícone para um "check" de confirmação
-      ),
     );
   }
-  
 }
